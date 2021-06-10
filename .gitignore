@@ -1,2 +1,8 @@
 /.vs/
 .vs/
+.*
+.*/
+*.vcproj.*
+*.vcxproj.*
+Debug/
+!/.gitignore

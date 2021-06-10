@@ -12,7 +12,17 @@ namespace DK{
 		std::list<std::string> helpPrint;
 		curTable table;
 		curCLTy cmdline;
+
+		static const char* nullDir =
+#ifdef WIN32
+		"NUL";
+#elif defined __linux
+		"/dev/null";
+#elif defined __unix
+		"/dev/null";
+#endif
 		
+		static FILE* NUL;
 		void storeIntoTable(const std::string& key, curCLPoint& valuePoint) {
 			static std::string temp;
 			if(key[0] == '-' && key[1] == '-') {
@@ -31,16 +41,17 @@ namespace DK{
 		
 		void parseEQExp(curCLPoint& pointer) {
 			std::string& curLine = *pointer;
-			static std::string temp{curLine, curLine.find_first_of('=') + 1};
+			std::string temp{curLine, curLine.find_first_of('=') + 1};
 			curLine.erase(curLine.find_first_of('='));
 			auto newIt = cmdline.insert(pointer, temp);
 			temp.clear();
-
 			storeIntoTable(curLine, newIt);
 		}
 
 	public:
-
+		dkCmdline() {
+			
+		}
 		void erase();
 		void changeTable();
 		
@@ -79,8 +90,34 @@ namespace DK{
 		const std::string& getItemValue(const std::string& name);
 		
 		void parse(int argc, const char* argv[]) {
-			
+			char temp[256];
+			int i = 1;
+			while (i < argc) {
+				if (std::strlen(argv[i]) > 255) {
+					return;
+				}
+				auto it = cmdline.insert(cmdline.end(), argv[i]);
+				if (*(argv[i]) == '-' && *(argv[i] + 1) == '-') {
+					if (sscanf_s(argv[i], "%[=]", temp, 255)) {
+						parseEQExp(it);
+					}
+					else {
+						
+					}
+				}
+				else if (*(argv[i]) == '-') {
+					if (argv[i][2] == '=') {
+						parseEQExp(it);
+					}
+					else {
+						
+					}
+				}
+				else {
+					return;
+				}
+				
+			}
 		}
-		
 	};
 }
